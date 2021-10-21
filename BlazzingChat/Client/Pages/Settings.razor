@@ -1,0 +1,18 @@
+﻿@page "/settings"
+@using BlazzingChat.Client.ViewModels
+
+<h2><b>Settings</b></h2>
+<hr />
+
+<div class="col-12">
+    <input type="checkbox" @bind="@_settingsViewModel.Notifications" id="chkNotification" />
+    <label>Notification</label>
+    <br />
+
+    <input type="checkbox" @bind="@_settingsViewModel.DarkTheme" id="chkDarkTheme" />
+    <label>Notification</label>
+    <br />
+</div>
+<div class="col-12">
+    <button class="btn btn-primary" @onclick="_settingsViewModel.Save">Save</button>
+</div>

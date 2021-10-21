@@ -1,0 +1,12 @@
+﻿@page "/"
+
+<div class="col-12">
+    <input type="text" @bind-value="@_profileViewModel.FirstName" class="form-control" placeholder="First name" />
+    <br />             
+    <input type="text" @bind-value="@_profileViewModel.LastName" class="form-control" placeholder="Last name" />
+    <br />
+    <input type="email" @bind-value="@_profileViewModel.EmailAddress" class="form-control" placeholder="Email address" />
+    <br />
+    <button class="btn btn-primary" @onclick="_profileViewModel.UpdateProfile">Update profile</button>
+    <span>&nbsp;&nbsp;</span>@_profileViewModel.Message
+</div>
