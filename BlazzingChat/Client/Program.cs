@@ -1,4 +1,5 @@
 using BlazzingChat.Client.ViewModels;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,8 +19,10 @@ namespace BlazzingChat.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
 
-            //If fails, change it to Singleton
-            //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddOptions();
+            builder.Services.AddAuthorizationCore();    
+
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             builder.Services.AddHttpClient<IProfileViewModel, ProfileViewModel>
                 ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
@@ -29,6 +32,11 @@ namespace BlazzingChat.Client
 
             builder.Services.AddHttpClient<IContactsViewModel, ContactsViewModel>
                 ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+
+            builder.Services.AddHttpClient<ILoginViewModel, LoginViewModel>
+                ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+
+            builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
             await builder.Build().RunAsync();
         }

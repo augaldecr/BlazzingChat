@@ -10,6 +10,7 @@ namespace BlazzingChat.Client.ViewModels
         //properties
         public bool Notifications { get; set; }
         public bool DarkTheme { get; set; }
+
         private HttpClient _httpClient;
 
         //methods
@@ -22,14 +23,13 @@ namespace BlazzingChat.Client.ViewModels
         }
         public async Task GetProfile()
         {
-            User user = await _httpClient.GetFromJsonAsync<User>("user/getprofile/10");
+            User user = await _httpClient.GetFromJsonAsync<User>("api/Users/1");
             LoadCurrentObject(user);
         }
         public async Task Save()
         {
-            await _httpClient.GetFromJsonAsync<User>($"user/updatetheme?userId={10}&value={this.DarkTheme.ToString()}");
-
-            await _httpClient.GetFromJsonAsync<User>($"user/updatenotifications?userId={10}&value={this.Notifications.ToString()}");
+            User user = new() { DarkTheme = int.Parse(this.DarkTheme.ToString()), Notifications = int.Parse(this.Notifications.ToString()) };
+            await _httpClient.PutAsJsonAsync<User>($"api/Users/UpdateSettings/1", this);
         }
         private void LoadCurrentObject(SettingsViewModel settingsViewModel)
         {
@@ -42,8 +42,8 @@ namespace BlazzingChat.Client.ViewModels
         {
             return new SettingsViewModel
             {
-                Notifications = (user.Notifications == null || (long)user.Notifications == 0) ? false : true,
-                DarkTheme = (user.DarkTheme == null || (long)user.DarkTheme == 0) ? false : true
+                Notifications = (user.Notifications == null || (int)user.Notifications == 0) ? false : true,
+                DarkTheme = (user.DarkTheme == null || (int)user.DarkTheme == 0) ? false : true
             };
         }
         public static implicit operator User(SettingsViewModel settingsViewModel)

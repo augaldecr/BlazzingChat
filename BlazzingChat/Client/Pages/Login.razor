@@ -1,0 +1,16 @@
+﻿@page "/"
+
+<h2><b>Login</b></h2>
+<hr />
+
+<div class="col-6">
+    <input type="email" @bind="@_loginViewModel.Email" class="form-control" placeholder="Email address" />
+</div>
+
+<div class="col-6">
+    <input type="password" @bind="@_loginViewModel.Password" class="form-control" placeholder="Password" />
+</div>
+
+<div class="col-6">
+    <button class="btn btn-primary" @onclick="LoginUser">Login</button>
+</div>

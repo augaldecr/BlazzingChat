@@ -6,12 +6,7 @@ namespace BlazzingChat.Client.Pages
 {
     public partial class Settings : ComponentBase
     {
-        private readonly ISettingsViewModel _settingsViewModel;
-
-        public Settings(ISettingsViewModel settingsViewModel)
-        {
-            _settingsViewModel = settingsViewModel;
-        }
+        [Inject] public ISettingsViewModel _settingsViewModel { get; set; }
 
         protected override async Task OnInitializedAsync() => await _settingsViewModel.GetProfile();
     }

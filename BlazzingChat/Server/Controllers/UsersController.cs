@@ -1,11 +1,13 @@
 ﻿using BlazzingChat.Server.Data;
 using BlazzingChat.Shared;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BlazzingChat.Server.Controllers
@@ -92,6 +94,39 @@ namespace BlazzingChat.Server.Controllers
             return NoContent();
         }
 
+        // PUT: api/Users/UpdateSettings/5
+        [HttpPut("UpdateSettings/{id}")]
+        public async Task<IActionResult> UpdateSettings(int id, User user)
+        {
+            if (id != user.Id)
+            {
+                return BadRequest();
+            }
+
+            var userToUpdate = await _context.Users.FindAsync(id);
+
+            if (userToUpdate is null)
+            {
+                return NotFound();
+            }
+
+            userToUpdate.Notifications = user.Notifications;
+            userToUpdate.DarkTheme = user.DarkTheme;
+
+            _context.Users.Update(userToUpdate);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return NoContent();
+        }
+
         // POST: api/Users
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
@@ -100,6 +135,51 @@ namespace BlazzingChat.Server.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
+        }
+
+        //Authentication methods
+        // POST: api/Users/loginuser
+        [HttpPost("loginuser")]
+        public async Task<ActionResult<User>> LoginUser(User user)
+        {
+            User loggedInUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.EmailAddress.Equals(user.EmailAddress) &&
+                                          u.Password.Equals(user.Password));
+            if (user is not null)
+            {
+                //create a claim
+                Claim claim = new Claim(ClaimTypes.Name, loggedInUser.EmailAddress);
+                //create a claimsIdentity
+                ClaimsIdentity claimsIdentity = new ClaimsIdentity(new[] { claim }, "serverAuth");
+                //create a claimsPrincipal
+                ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
+                //Sign in user
+                await HttpContext.SignInAsync(claimsPrincipal);
+            }
+
+            return await Task.FromResult(loggedInUser);
+        }
+
+        // GET: api/Users/getcurrentuser
+        [HttpGet("getcurrentuser")]
+        public async Task<ActionResult<User>> GetCurrentUser()
+        {
+            User currentUser = new User();
+
+            if (User.Identity.IsAuthenticated)
+            {
+                currentUser.EmailAddress = User.FindFirstValue(ClaimTypes.Name);
+            }
+
+            return await Task.FromResult(currentUser);
+        }
+
+        [HttpGet("logoutuser")]
+        // GET: api/Users/logoutuser
+        public async Task<ActionResult<String>> LogoutUser()
+        {
+            await HttpContext.SignOutAsync();
+            return "Success";
         }
 
         // DELETE: api/Users/5
