@@ -1,11 +1,16 @@
 ﻿using BlazzingChat.Server.Data;
+using BlazzingChat.Server.Helpers;
 using BlazzingChat.Shared;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Twitter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -79,6 +84,11 @@ namespace BlazzingChat.Server.Controllers
             userToUpdate.FirstName = user.FirstName;
             userToUpdate.LastName = user.LastName;
             userToUpdate.EmailAddress = user.EmailAddress;
+            userToUpdate.AboutMe = user.AboutMe;
+            if (user.ProfilePictDataUrl is not null)
+            {
+                userToUpdate.ProfilePictDataUrl = user.ProfilePictDataUrl;
+            }
 
             _context.Users.Update(userToUpdate);
 
@@ -142,44 +152,125 @@ namespace BlazzingChat.Server.Controllers
         [HttpPost("loginuser")]
         public async Task<ActionResult<User>> LoginUser(User user)
         {
+            //user.Password = Utilities.Encrypt(user.Password);
             User loggedInUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.EmailAddress.Equals(user.EmailAddress) &&
                                           u.Password.Equals(user.Password));
-            if (user is not null)
+            if (loggedInUser is not null)
             {
                 //create a claim
-                Claim claim = new Claim(ClaimTypes.Name, loggedInUser.EmailAddress);
+                Claim claimEmail = new(ClaimTypes.Email, loggedInUser.EmailAddress);
+                Claim claimIdentifier = new(ClaimTypes.NameIdentifier, loggedInUser.Id.ToString());
                 //create a claimsIdentity
-                ClaimsIdentity claimsIdentity = new ClaimsIdentity(new[] { claim }, "serverAuth");
+                ClaimsIdentity claimsIdentity = new ClaimsIdentity(new[] { claimEmail, claimIdentifier }, "serverAuth");
                 //create a claimsPrincipal
                 ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
+
                 //Sign in user
-                await HttpContext.SignInAsync(claimsPrincipal);
+                try
+                {
+                    await HttpContext.SignInAsync(claimsPrincipal);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message); ;
+                }
             }
 
-            return await Task.FromResult(loggedInUser);
+            return Ok(loggedInUser);
         }
 
         // GET: api/Users/getcurrentuser
         [HttpGet("getcurrentuser")]
         public async Task<ActionResult<User>> GetCurrentUser()
         {
-            User currentUser = new User();
+            User currentUser = new();
 
             if (User.Identity.IsAuthenticated)
             {
-                currentUser.EmailAddress = User.FindFirstValue(ClaimTypes.Name);
+                currentUser = await _context.Users
+                                    .FirstOrDefaultAsync(u => u.EmailAddress.Equals(User.FindFirstValue(ClaimTypes.Email)));
+                if (currentUser is null)
+                {
+                    currentUser = new();
+                    currentUser.Id = _context.Users.Max(u => u.Id) + 1;
+                    currentUser.EmailAddress = User.FindFirstValue(ClaimTypes.Email);
+                    currentUser.Password = Utilities.Encrypt(currentUser.EmailAddress);
+                    currentUser.Source = "EXTL";
+
+                    _context.Users.Add(currentUser);
+                    await _context.SaveChangesAsync();
+                }
             }
 
-            return await Task.FromResult(currentUser);
+            return Ok(currentUser);
         }
 
-        [HttpGet("logoutuser")]
+
+        // GET: api/Users/getonlyvisiblecontacts
+        [HttpGet("getonlyvisiblecontacts")]
+        public ActionResult<List<User>> GetOnlyVisibleContacts(int startIndex, int count)
+        {
+            List<User> users = new();
+            users.AddRange(Enumerable.Range(startIndex, count).Select(x => new User 
+                                                            { Id = x, FirstName = $"First{x}", LastName = $"Last{x}" }));
+
+            return users;
+        }
+
         // GET: api/Users/logoutuser
+        [HttpGet("logoutuser")]
         public async Task<ActionResult<String>> LogoutUser()
         {
             await HttpContext.SignOutAsync();
             return "Success";
+        }
+
+        // GET: api/Users/TwitterSignIn
+        [HttpGet("TwitterSignIn")]
+        public async Task TwitterSignIn()
+        {
+            await HttpContext.ChallengeAsync(TwitterDefaults.AuthenticationScheme,
+                new AuthenticationProperties { RedirectUri = "/profile" });
+        }
+
+        // GET: api/Users/FacebookSignIn
+        [HttpGet("FacebookSignIn")]
+        public async Task FacebookSignIn()
+        {
+            await HttpContext.ChallengeAsync(FacebookDefaults.AuthenticationScheme,
+                new AuthenticationProperties { RedirectUri = "/profile" });
+        }
+
+        // GET: api/Users/GoogleSignIn
+        [HttpGet("GoogleSignIn")]
+        public async Task GoogleSignIn()
+        {
+            await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme,
+                new AuthenticationProperties { RedirectUri = "/profile" });
+        }
+
+        // GET: api/Users/DownloadServerFile
+        [HttpGet("DownloadServerFile")]
+        public async Task<ActionResult<string>> DownloadServerFile()
+        {
+            var filePath = "idl_estrategias.docx";
+
+            try
+            {
+                using var fileInput = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                MemoryStream memoryStream = new MemoryStream();
+                await fileInput.CopyToAsync(memoryStream);
+
+                var buffer = memoryStream.ToArray();
+                return Convert.ToBase64String(buffer);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return NotFound();
+            }
+
         }
 
         // DELETE: api/Users/5

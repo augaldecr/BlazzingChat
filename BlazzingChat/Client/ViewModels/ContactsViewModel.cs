@@ -26,6 +26,14 @@ namespace BlazzingChat.Client.ViewModels
             LoadCurrentObject(users);
         }
 
+        public async Task<List<Contact>> GetOnlyVisibleContacts(int startIndex, int count)
+        {
+            List<User> users = await _httpClient.GetFromJsonAsync<List<User>>(
+                $"api/Users/getonlyvisiblecontacts?startIndex={startIndex}&count={count}");
+            LoadCurrentObject(users);
+            return Contacts;
+        }
+
         private void LoadCurrentObject(List<User> users)
         {
             this.Contacts = new List<Contact>();

@@ -17,6 +17,10 @@ namespace BlazzingChat.Client.ViewModels
 
         public string EmailAddress { get; set; }
 
+        public string AboutMe { get; set; }
+
+        public string ProfilePictDataUrl { get; set; }
+
         public string Message { get; set; }
         
         public ProfileViewModel() { }
@@ -32,7 +36,7 @@ namespace BlazzingChat.Client.ViewModels
 
         public async Task GetProfile()
         {
-            User user = await _httpClient.GetFromJsonAsync<User>("api/Users/1");
+            User user = await _httpClient.GetFromJsonAsync<User>($"api/Users/{Id}");
             LoadData(user);
             Message = "Profile loaded";
         }
@@ -43,6 +47,8 @@ namespace BlazzingChat.Client.ViewModels
             FirstName = model.FirstName;
             LastName = model.LastName;
             EmailAddress = model.EmailAddress;
+            AboutMe = model.AboutMe;
+            ProfilePictDataUrl = model.ProfilePictDataUrl;
         }
 
         public static implicit operator ProfileViewModel(User user)
@@ -53,6 +59,8 @@ namespace BlazzingChat.Client.ViewModels
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 EmailAddress = user.EmailAddress,
+                AboutMe = user.AboutMe,
+                ProfilePictDataUrl=user.ProfilePictDataUrl,
             };
         }
 
@@ -64,6 +72,8 @@ namespace BlazzingChat.Client.ViewModels
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 EmailAddress = model.EmailAddress,
+                AboutMe = model.AboutMe,
+                ProfilePictDataUrl = model.ProfilePictDataUrl,
             };
         }
     }

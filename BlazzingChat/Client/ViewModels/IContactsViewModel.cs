@@ -7,5 +7,6 @@ namespace BlazzingChat.Client.ViewModels
     {
         public List<Contact> Contacts { get; set; }
         public Task GetContacts();
+        public Task<List<Contact>> GetOnlyVisibleContacts(int startIndex, int count);
     }
 }

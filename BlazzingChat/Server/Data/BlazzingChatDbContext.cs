@@ -17,7 +17,7 @@ namespace BlazzingChat.Server.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Name=BlazzingChatDbContext");
+                optionsBuilder.UseSqlServer("Name=ConnectionStrings:BlazzingChatDbContext");
             }
         }
 
@@ -69,6 +69,10 @@ namespace BlazzingChat.Server.Data
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasMaxLength(50);
+
+                entity.Property(e => e.ProfilePictDataUrl)
+                    .HasColumnType("text")
+                    .HasColumnName("profile_pict_data_url");
 
                 entity.Property(e => e.ProfilePictureUrl)
                     .HasMaxLength(150)

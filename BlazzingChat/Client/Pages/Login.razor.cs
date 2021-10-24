@@ -14,5 +14,20 @@ namespace BlazzingChat.Client.Pages
             await _loginViewModel.LoginUser();
             _navigationManager.NavigateTo("/profile", true);
         }
+
+        private void TwitterSignIn()
+        {
+            _navigationManager.NavigateTo("api/Users/TwitterSignIn", true);
+        }       
+        
+        private void FacebookSignIn()
+        {
+            _navigationManager.NavigateTo("api/Users/FacebookSignIn", true);
+        } 
+        
+        private void GoogleSignIn()
+        {
+            _navigationManager.NavigateTo("api/Users/GoogleSignIn", true);
+        }
     }
 }

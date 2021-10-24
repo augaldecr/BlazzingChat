@@ -23,9 +23,10 @@ namespace BlazzingChat.Client
             if (currentUser is not null && currentUser.EmailAddress is not null)
             {
                 //create a claim
-                Claim claim = new(ClaimTypes.Name, currentUser.EmailAddress);
+                Claim claimEmail = new(ClaimTypes.Name, currentUser.EmailAddress);
+                Claim claimIdentifier = new(ClaimTypes.NameIdentifier, currentUser.Id.ToString());
                 //create a claimsIdentity
-                ClaimsIdentity claimsIdentity = new(new[] { claim }, "serverAuth");
+                ClaimsIdentity claimsIdentity = new(new[] { claimEmail, claimIdentifier }, "serverAuth");
                 //create a claimsPrincipal
                 ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
 

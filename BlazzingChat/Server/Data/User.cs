@@ -25,6 +25,7 @@ namespace BlazzingChat.Server.Data
         public int? Notifications { get; set; }
         public int? DarkTheme { get; set; }
         public byte[] CreationDate { get; set; }
+        public string ProfilePictDataUrl { get; set; }
 
         public virtual ICollection<ChatHistory> ChatHistoryFromUsers { get; set; }
         public virtual ICollection<ChatHistory> ChatHistoryToUsers { get; set; }
