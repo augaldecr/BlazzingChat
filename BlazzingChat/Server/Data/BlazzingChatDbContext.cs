@@ -11,6 +11,7 @@ namespace BlazzingChat.Server.Data
         public BlazzingChatDbContext(DbContextOptions<BlazzingChatDbContext> options) : base(options) { }
 
         public virtual DbSet<ChatHistory> ChatHistories { get; set; }
+        public virtual DbSet<Log> Logs { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -48,6 +49,35 @@ namespace BlazzingChat.Server.Data
                     .HasConstraintName("FK_ChatHistory_Users1");
             });
 
+            modelBuilder.Entity<Log>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("text")
+                    .HasColumnName("created_date");
+
+                entity.Property(e => e.EventName)
+                    .HasColumnType("text")
+                    .HasColumnName("event_name");
+
+                entity.Property(e => e.ExceptionMessage)
+                    .HasColumnType("text")
+                    .HasColumnName("exception_message");
+
+                entity.Property(e => e.LogLevel)
+                    .HasColumnType("text")
+                    .HasColumnName("log_level");
+
+                entity.Property(e => e.Source)
+                    .HasColumnType("text")
+                    .HasColumnName("\"source\"");
+
+                entity.Property(e => e.StackTrace)
+                    .HasColumnType("text")
+                    .HasColumnName("stack_trace");
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.Property(e => e.AboutMe).HasMaxLength(50);
@@ -73,10 +103,6 @@ namespace BlazzingChat.Server.Data
                 entity.Property(e => e.ProfilePictDataUrl)
                     .HasColumnType("text")
                     .HasColumnName("profile_pict_data_url");
-
-                entity.Property(e => e.ProfilePictureUrl)
-                    .HasMaxLength(150)
-                    .HasColumnName("ProfilePictureURL");
 
                 entity.Property(e => e.Source)
                     .IsRequired()

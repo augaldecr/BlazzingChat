@@ -1,4 +1,60 @@
 ﻿@page "/chat"
-@page "/chat/{ContactId:int}"
+@page "/chat/{ToUserId}"
 
-<h1>Chat with: @ContactId</h1>
+<div style="border:0px;height:90vh;">    
+    <div class="panel panel-primary" style="height: 100%;">
+        <div class="panel-heading top-bar">
+            <div class="col-md-8 col-xs-8">
+                <h3 class="panel-title">
+                    @if(ToUser != null)
+                    {
+                        @if(ToUser.FirstName is not null || ToUser.LastName is not null)
+                        {                    
+                            <b>@ToUser.FirstName<span>&nbsp;</span>@ToUser.LastName</b>
+                        }
+                        else
+                        {
+                            <b>@ToUser.EmailAddress</b>
+                        }
+                    }
+                </h3>
+            </div>
+        </div>
+        <div id="divMessageContainerBase" class="panel-body msg_container_base">
+            @if(Messages is not null && Messages.Count() > 0 )
+            {
+                @foreach (var message in Messages)
+                {            
+                    @if(message.FromUserId == FromUserId)
+                    {
+                        <div class="row msg_container base_sent">
+                            <div class="col-md-10 col-xs-10">
+                                <div class="messages msg_sent">
+                                    <p>@message.MessageText</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row msg_container base_receive">
+                            <div class="col-md-10 col-xs-10">
+                                <div class="messages msg_receive">
+                                    <p>@message.MessageText</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+        <!--CHAT USER BOX-->
+        <div class="panel-footer">
+            <div class="input-group" id="myForm">
+                <input id="txtMessageInput" @bind="MessageText" type="text" class="form-control input-sm chat_input" 
+                placeholder="Write your message here...">
+                <button class="btn btn-primary" @onclick="Send">Send</button>
+            </div>
+        </div>
+    </div>
+</div>

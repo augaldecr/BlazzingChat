@@ -4,6 +4,7 @@ namespace BlazzingChat.Client.ViewModels
 {
     public interface ISettingsViewModel
     {
+        public int Id { get; set; }
         public bool Notifications { get; set; }
         public bool DarkTheme { get; set; }
 

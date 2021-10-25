@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Twitter;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ using System.Threading.Tasks;
 namespace BlazzingChat.Server.Controllers
 {
     [Route("api/[controller]")]
+    //[Authorize]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -31,6 +33,7 @@ namespace BlazzingChat.Server.Controllers
         }
 
         // GET: api/Users
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Contact>>> GetUsers()
         {
@@ -66,6 +69,7 @@ namespace BlazzingChat.Server.Controllers
         }
 
         // PUT: api/Users/5
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
@@ -105,6 +109,7 @@ namespace BlazzingChat.Server.Controllers
         }
 
         // PUT: api/Users/UpdateSettings/5
+        [Authorize]
         [HttpPut("UpdateSettings/{id}")]
         public async Task<IActionResult> UpdateSettings(int id, User user)
         {
@@ -138,6 +143,7 @@ namespace BlazzingChat.Server.Controllers
         }
 
         // POST: api/Users
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
@@ -166,10 +172,12 @@ namespace BlazzingChat.Server.Controllers
                 //create a claimsPrincipal
                 ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
 
+                var authProperties = GetAuthenticationProperties;
+
                 //Sign in user
                 try
                 {
-                    await HttpContext.SignInAsync(claimsPrincipal);
+                    await HttpContext.SignInAsync(claimsPrincipal, authProperties);
                 }
                 catch (Exception ex)
                 {
@@ -206,8 +214,8 @@ namespace BlazzingChat.Server.Controllers
             return Ok(currentUser);
         }
 
-
         // GET: api/Users/getonlyvisiblecontacts
+        [Authorize]
         [HttpGet("getonlyvisiblecontacts")]
         public ActionResult<List<User>> GetOnlyVisibleContacts(int startIndex, int count)
         {
@@ -218,7 +226,14 @@ namespace BlazzingChat.Server.Controllers
             return users;
         }
 
+        // GET: api/Users/getvisiblecontacts
+        [Authorize]
+        [HttpGet("getvisiblecontacts")]
+        public async Task<List<User>> GetVisibleContacts(int startIndex, int count) =>
+            await _context.Users.Skip(startIndex).Take(count).ToListAsync();
+
         // GET: api/Users/logoutuser
+        [Authorize]
         [HttpGet("logoutuser")]
         public async Task<ActionResult<String>> LogoutUser()
         {
@@ -226,31 +241,32 @@ namespace BlazzingChat.Server.Controllers
             return "Success";
         }
 
+        // GET: api/Users/getcontactscount
+        [Authorize]
+        [HttpGet("getcontactscount")]
+        public async Task<int> GetContactsCount()
+        {
+            throw new IndexOutOfRangeException();
+            await _context.Users.CountAsync();
+        }
+
         // GET: api/Users/TwitterSignIn
         [HttpGet("TwitterSignIn")]
-        public async Task TwitterSignIn()
-        {
-            await HttpContext.ChallengeAsync(TwitterDefaults.AuthenticationScheme,
-                new AuthenticationProperties { RedirectUri = "/profile" });
-        }
+        public async Task TwitterSignIn() =>  await HttpContext
+            .ChallengeAsync(TwitterDefaults.AuthenticationScheme, GetAuthenticationProperties);
 
         // GET: api/Users/FacebookSignIn
         [HttpGet("FacebookSignIn")]
-        public async Task FacebookSignIn()
-        {
-            await HttpContext.ChallengeAsync(FacebookDefaults.AuthenticationScheme,
-                new AuthenticationProperties { RedirectUri = "/profile" });
-        }
+        public async Task FacebookSignIn() => await HttpContext
+            .ChallengeAsync(FacebookDefaults.AuthenticationScheme, GetAuthenticationProperties);
 
         // GET: api/Users/GoogleSignIn
         [HttpGet("GoogleSignIn")]
-        public async Task GoogleSignIn()
-        {
-            await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme,
-                new AuthenticationProperties { RedirectUri = "/profile" });
-        }
+        public async Task GoogleSignIn() => await HttpContext
+            .ChallengeAsync(GoogleDefaults.AuthenticationScheme, GetAuthenticationProperties);
 
         // GET: api/Users/DownloadServerFile
+        [Authorize]
         [HttpGet("DownloadServerFile")]
         public async Task<ActionResult<string>> DownloadServerFile()
         {
@@ -274,6 +290,7 @@ namespace BlazzingChat.Server.Controllers
         }
 
         // DELETE: api/Users/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -289,9 +306,17 @@ namespace BlazzingChat.Server.Controllers
             return NoContent();
         }
 
-        private bool UserExists(int id)
+        public AuthenticationProperties GetAuthenticationProperties => new()
+                                                                            {
+                                                                                IsPersistent = true,
+                                                                                ExpiresUtc = DateTime.Now.AddMinutes(30),
+                                                                                RedirectUri = "/profile",
+                                                                            };
+
+        [HttpGet("notauthorized")]
+        public IActionResult NotAuthorized()
         {
-            return _context.Users.Any(e => e.Id == id);
+            return Unauthorized();
         }
     }
 }

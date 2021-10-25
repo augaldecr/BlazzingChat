@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.JSInterop;
 using BlazzingChat.Client.ViewModels;
 using System.Net.Http;
+using Microsoft.JSInterop.Implementation;
 
 namespace BlazzingChat.Client.Pages
 {
@@ -14,13 +15,12 @@ namespace BlazzingChat.Client.Pages
     {
         [Inject] IProfileViewModel _profileViewModel { get; set; }
         [Inject] NavigationManager _navigationManager { get; set; }
-        //[Inject] AuthenticationStateProvider _authenticationStateProvider { get; set; }
         [Inject] IJSRuntime _jsruntime {  get; set; }
         [Inject] HttpClient _httpClient { get; set; }
 
         private IJSObjectReference _jsUtils;
 
-        [CascadingParameter] public Task<AuthenticationState> _authenticationState { get; set; }
+        [CascadingParameter] Task<AuthenticationState> _authenticationState { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -32,7 +32,18 @@ namespace BlazzingChat.Client.Pages
                 var claim = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
                 _profileViewModel.Id = Convert.ToInt32(claim?.Value);
 
-                await _profileViewModel.GetProfile();
+                try
+                {
+                    await _profileViewModel.GetProfile();
+                }
+                catch (System.Net.Http.HttpRequestException hex)
+                {
+                    if (hex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        await _httpClient.GetAsync("api/Users/logoutuser");
+                        _navigationManager.NavigateTo("/", true);
+                    }
+                }
             }
             else
             {

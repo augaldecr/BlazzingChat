@@ -19,7 +19,6 @@ namespace BlazzingChat.Server.Data
         public string Source { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string ProfilePictureUrl { get; set; }
         public DateTime? Birthday { get; set; }
         public string AboutMe { get; set; }
         public int? Notifications { get; set; }

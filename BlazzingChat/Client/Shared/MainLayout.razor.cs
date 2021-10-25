@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BlazzingChat.Client.Shared
 {
-    public partial class MainLayout : LayoutComponentBase
+    public partial class MainLayout
     {
         [Inject] private NavigationManager _navigationManager { get; set; }
         [Inject] private HttpClient _httpClient { get; set; }

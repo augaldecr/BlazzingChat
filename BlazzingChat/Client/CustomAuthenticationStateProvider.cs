@@ -11,10 +11,7 @@ namespace BlazzingChat.Client
     {
         private readonly HttpClient _httpClient;
 
-        public CustomAuthenticationStateProvider(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
+        public CustomAuthenticationStateProvider(HttpClient httpClient) => _httpClient = httpClient;
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {

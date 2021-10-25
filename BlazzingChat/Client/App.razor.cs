@@ -14,7 +14,7 @@ namespace BlazzingChat.Client
 
         private async Task OnNavigation(NavigationContext navigationContext)
         {
-            if (navigationContext.Path == "settings")
+            if (navigationContext.Path == "/settings")
             {
                 var assemblies = await AssemblyLoader.LoadAssembliesAsync(new[] { "Radzen.Blazor.dll" });
                 lazyLoadedAssemblies.AddRange(assemblies);

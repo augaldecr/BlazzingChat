@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using BlazzingChat.Server.Hubs;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.Linq;
+using Microsoft.Extensions.Logging;
+using BlazzingChat.Server.Logging;
 
 namespace BlazzingChat.Server
 {
@@ -22,11 +27,20 @@ namespace BlazzingChat.Server
             services.AddDbContext<BlazzingChatDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("BlazzingChatDbContext")));
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddSignalR();
+
+            services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                        new [] { "application/octect-stream" }
+                    );
+            });
 
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie()
+            })
+                .AddCookie(opts => { opts.LoginPath = "/user/notauthorized"; })
             .AddTwitter(twitterOptions => 
             {
                 twitterOptions.ConsumerKey = Configuration["Authentication:Twitter:ConsumerKey"];
@@ -45,8 +59,12 @@ namespace BlazzingChat.Server
             });            
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            var serviceProvider = app.ApplicationServices.CreateScope().ServiceProvider;
+            var appDBContext = serviceProvider.GetRequiredService<BlazzingChatDbContext>();
+            loggerFactory.AddProvider(new ApplicationLoggerProvider(appDBContext));
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -57,6 +75,8 @@ namespace BlazzingChat.Server
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
+
+            app.UseResponseCompression();
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
@@ -71,6 +91,7 @@ namespace BlazzingChat.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chathub");
                 endpoints.MapFallbackToFile("index.html");
             });
         }

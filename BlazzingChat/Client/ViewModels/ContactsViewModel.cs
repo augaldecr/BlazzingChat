@@ -42,5 +42,19 @@ namespace BlazzingChat.Client.ViewModels
                 this.Contacts.Add(user);
             }
         }
+
+        public async Task<int> GetContactsCount()
+        {
+            return await _httpClient.GetFromJsonAsync<int>($"api/Users/getcontactscount");
+        }
+
+        public async Task<List<Contact>> GetVisibleContacts(int startIndex, int count)
+        {
+            List<User> users = await _httpClient.GetFromJsonAsync<List<User>>(
+                $"api/Users/getvisiblecontacts?startIndex={startIndex}&count={count}");
+
+            LoadCurrentObject(users);
+            return Contacts;
+        }
     }
 }

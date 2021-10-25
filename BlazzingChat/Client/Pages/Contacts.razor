@@ -10,24 +10,28 @@
     </div>
     <br />
 
-    @if (_contactsViewModel.Contacts is not null && _contactsViewModel.Contacts.Count() > 0)
+    @if (ContactsCount > 0)
     {
         @*        @foreach (var contact in _contactsViewModel.Contacts)
             {
             <a href="/chat/@contact.ContactId" class="list-group-item list-group-item-action flex-column align-items-start bold-text">
             @contact.FirstName <span> </span> @contact.LastName
             </a>
-            }*@
-        @*        <Virtualize Items="@_contactsViewModel.Contacts" Context="contact">*@
+            }
+            <Virtualize Items="@_contactsViewModel.Contacts" Context="contact">*@
         <Virtualize ItemsProvider="LoadOnlyVisibleContacts" Context="contact">
             <ItemContent>
-                <a href="/chat/@contact.ContactId"
-               class="list-group-item list-group-item-action flex-column align-items-start bold-text">
-                    @contact.FirstName <span> </span> @contact.LastName
-                </a>
+                <div style="height: 50px;">
+                    <a href="/chat/@contact.ContactId"
+                   class="list-group-item list-group-item-action flex-column align-items-start bold-text">
+                        @contact.FirstName <span> </span> @contact.LastName
+                    </a>
+                </div>
             </ItemContent>
             <Placeholder>
-                <p>Loading...</p>
+                <div style="height: 50px;">
+                    <p>Loading...</p>
+                </div>
             </Placeholder>
         </Virtualize>
     }

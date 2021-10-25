@@ -1,7 +1,9 @@
+using BlazzingChat.Client.Logging;
 using BlazzingChat.Client.ViewModels;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -20,6 +22,21 @@ namespace BlazzingChat.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+            builder.Services.AddLogging(logging =>
+            {
+                var httpClient = builder.Services.BuildServiceProvider().GetRequiredService<HttpClient>();
+                logging.SetMinimumLevel(LogLevel.Error);
+                logging.AddProvider(new ApplicationLoggerProvider(httpClient));
+            });
+
+            LoadHttpClients(builder);
+            builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+
+            await builder.Build().RunAsync();
+        }
+
+        public static void LoadHttpClients(WebAssemblyHostBuilder builder)
+        {
             builder.Services.AddHttpClient<IProfileViewModel, ProfileViewModel>
                 ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
@@ -31,10 +48,6 @@ namespace BlazzingChat.Client
 
             builder.Services.AddHttpClient<ILoginViewModel, LoginViewModel>
                 ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
-
-            builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-
-            await builder.Build().RunAsync();
         }
     }
 }

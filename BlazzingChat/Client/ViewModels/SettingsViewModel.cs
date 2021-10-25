@@ -7,13 +7,12 @@ namespace BlazzingChat.Client.ViewModels
 {
     public class SettingsViewModel : ISettingsViewModel
     {
-        //properties
+        public int Id { get; set; }
         public bool Notifications { get; set; }
         public bool DarkTheme { get; set; }
 
         private HttpClient _httpClient;
 
-        //methods
         public SettingsViewModel()
         {
         }
@@ -23,25 +22,26 @@ namespace BlazzingChat.Client.ViewModels
         }
         public async Task GetProfile()
         {
-            User user = await _httpClient.GetFromJsonAsync<User>("api/Users/1");
+            User user = await _httpClient.GetFromJsonAsync<User>($"api/Users/{Id}");
             LoadCurrentObject(user);
         }
         public async Task Save()
         {
             User user = new() { DarkTheme = int.Parse(this.DarkTheme.ToString()), Notifications = int.Parse(this.Notifications.ToString()) };
-            await _httpClient.PutAsJsonAsync<User>($"api/Users/UpdateSettings/1", this);
+            await _httpClient.PutAsJsonAsync<User>($"api/Users/UpdateSettings/{Id}", this);
         }
         private void LoadCurrentObject(SettingsViewModel settingsViewModel)
         {
-            this.DarkTheme = settingsViewModel.DarkTheme;
-            this.Notifications = settingsViewModel.Notifications;
+            Id = settingsViewModel.Id;
+            DarkTheme = settingsViewModel.DarkTheme;
+            Notifications = settingsViewModel.Notifications;
         }
 
-        //operators
         public static implicit operator SettingsViewModel(User user)
         {
             return new SettingsViewModel
             {
+                Id = user.Id,
                 Notifications = (user.Notifications == null || (int)user.Notifications == 0) ? false : true,
                 DarkTheme = (user.DarkTheme == null || (int)user.DarkTheme == 0) ? false : true
             };
@@ -50,6 +50,7 @@ namespace BlazzingChat.Client.ViewModels
         {
             return new User
             {
+                Id = settingsViewModel.Id,
                 Notifications = settingsViewModel.Notifications ? 1 : 0,
                 DarkTheme = settingsViewModel.DarkTheme ? 1 : 0
             };
