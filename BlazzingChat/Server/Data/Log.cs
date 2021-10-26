@@ -14,5 +14,6 @@ namespace BlazzingChat.Server.Data
         public string ExceptionMessage { get; set; }
         public string StackTrace { get; set; }
         public string CreatedDate { get; set; }
+        public int? UserId { get; set; }
     }
 }

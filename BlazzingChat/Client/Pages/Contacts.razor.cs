@@ -1,7 +1,9 @@
-﻿using BlazzingChat.Client.ViewModels;
+﻿using BlazzingChat.Client.Shared;
+using BlazzingChat.Client.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web.Virtualization;
+using System;
 using System.Threading.Tasks;
 
 namespace BlazzingChat.Client.Pages
@@ -10,6 +12,7 @@ namespace BlazzingChat.Client.Pages
     public partial class Contacts : ComponentBase
     {
         [CascadingParameter] Task<AuthenticationState> _authenticationState { get; set; }
+        [CascadingParameter] Error Error { get; set; }
         [Inject] NavigationManager _navigationManager { get; set; }
         [Inject] IContactsViewModel _contactsViewModel { get; set; }
 
@@ -25,19 +28,23 @@ namespace BlazzingChat.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            var authState = await _authenticationState;
-            var user = authState.User;
-
-            if (user.Identity.IsAuthenticated)
+            try
             {
-                ContactsCount = await _contactsViewModel.GetContactsCount();
+                var authState = await _authenticationState;
+                var user = authState.User;
+
+                if (user.Identity.IsAuthenticated)
+                {
+                    ContactsCount = await _contactsViewModel.GetContactsCount();
+                }
+                else _navigationManager.NavigateTo("/");
             }
-            else _navigationManager.NavigateTo("/");
+            catch (Exception ex)
+            {
+                Error.ProcessError(ex);
+            }
         }
 
-        private void NavigateToChat()
-        {
-            _navigationManager.NavigateTo("/chat");
-        }
+        private void NavigateToChat() => _navigationManager.NavigateTo("/chat");
     }
 }

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using BlazzingChat.Server.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace BlazzingChat.Server
 {
@@ -56,14 +57,22 @@ namespace BlazzingChat.Server
             {
                 googleOptions.ClientId = Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
-            });            
+            });
+
+            services.AddLogging(logging =>
+            {
+                logging.ClearProviders();
+            });
+            services.AddHttpContextAccessor();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             var serviceProvider = app.ApplicationServices.CreateScope().ServiceProvider;
             var appDBContext = serviceProvider.GetRequiredService<BlazzingChatDbContext>();
-            loggerFactory.AddProvider(new ApplicationLoggerProvider(appDBContext));
+            var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+
+            loggerFactory.AddProvider(new ApplicationLoggerProvider(appDBContext, httpContextAccessor));
 
             if (env.IsDevelopment())
             {

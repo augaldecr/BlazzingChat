@@ -76,6 +76,8 @@ namespace BlazzingChat.Server.Data
                 entity.Property(e => e.StackTrace)
                     .HasColumnType("text")
                     .HasColumnName("stack_trace");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
             });
 
             modelBuilder.Entity<User>(entity =>
