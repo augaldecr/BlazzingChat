@@ -32,7 +32,9 @@ namespace BlazzingChat.Server.Logging
         {
             var userId = _httpContextAccessor.HttpContext is null ?
                 string.Empty :
-                _httpContextAccessor?.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                _httpContextAccessor?.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier) is null ?
+                    String.Empty :
+                        _httpContextAccessor?.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier).Value;
 
 
             Log log = new();

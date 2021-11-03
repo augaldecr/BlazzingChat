@@ -12,6 +12,10 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using BlazzingChat.Server.Logging;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
 
 namespace BlazzingChat.Server
 {
@@ -25,11 +29,11 @@ namespace BlazzingChat.Server
         public IConfiguration Configuration { get; }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<BlazzingChatDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("BlazzingChatDbContext")));
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddSignalR();
 
+            services.AddDbContext<BlazzingChatDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("BlazzingChatDbContext")));
             services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
@@ -39,9 +43,24 @@ namespace BlazzingChat.Server
 
             services.AddAuthentication(options =>
             {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                //options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-                .AddCookie(opts => { opts.LoginPath = "/user/notauthorized"; })
+                            //.AddCookie(opts => { opts.LoginPath = "/user/notauthorized"; })
+            .AddJwtBearer(jwtBearerOptions =>
+            {
+                jwtBearerOptions.RequireHttpsMetadata = true;
+                jwtBearerOptions.SaveToken = true;
+                jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["JWTSettings:Secret"])),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                };
+            })
             .AddTwitter(twitterOptions => 
             {
                 twitterOptions.ConsumerKey = Configuration["Authentication:Twitter:ConsumerKey"];

@@ -1,5 +1,9 @@
-﻿using BlazzingChat.Client.ViewModels;
+﻿using Blazored.LocalStorage;
+using Blazored.Toast.Services;
+using BlazzingChat.Client.ViewModels;
+using BlazzingChat.Shared.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using System.Threading.Tasks;
 
 namespace BlazzingChat.Client.Pages
@@ -8,6 +12,20 @@ namespace BlazzingChat.Client.Pages
     {
         [Inject] private ILoginViewModel _loginViewModel { get; set; }
         [Inject] private NavigationManager _navigationManager { get; set; }
+        [Inject] private ILocalStorageService _localStorageService { get; set; }
+        [Inject] private IToastService _toastService { get; set; }
+
+        [CascadingParameter] public Task<AuthenticationState> authenticationState { get; set; }
+
+        protected override async Task OnInitializedAsync()
+        {
+            var authState = await authenticationState;
+            var user = authState.User;
+            if (user.Identity.IsAuthenticated)
+            {
+                _navigationManager.NavigateTo("/profile", true);
+            }
+        }
 
         private async Task LoginUser()
         {
@@ -17,17 +35,31 @@ namespace BlazzingChat.Client.Pages
 
         private void TwitterSignIn()
         {
-            _navigationManager.NavigateTo("api/Users/TwitterSignIn", true);
+            _navigationManager.NavigateTo($"api/Users/TwitterSignIn?isPersistent={_loginViewModel.RememberMe}", true);
         }       
         
         private void FacebookSignIn()
         {
-            _navigationManager.NavigateTo("api/Users/FacebookSignIn", true);
+            _navigationManager.NavigateTo($"api/Users/FacebookSignIn?isPersistent={_loginViewModel.RememberMe}", true);
         } 
         
         private void GoogleSignIn()
         {
-            _navigationManager.NavigateTo("api/Users/GoogleSignIn", true);
+            _navigationManager.NavigateTo($"api/Users/GoogleSignIn?isPersistent={_loginViewModel.RememberMe}", true);
+        }
+
+        public async Task AuthenticateJWT()
+        {
+            AuthenticationResponse authenticationResponse = await _loginViewModel.AuthenticateJWT();
+            if (!string.IsNullOrEmpty(authenticationResponse.Token))
+            {
+                await _localStorageService.SetItemAsync("jwt_token", authenticationResponse.Token);
+                _navigationManager.NavigateTo("/profile", true);
+            }
+            else
+            {
+                _toastService.ShowError("Invalid username or password");
+            }
         }
     }
 }

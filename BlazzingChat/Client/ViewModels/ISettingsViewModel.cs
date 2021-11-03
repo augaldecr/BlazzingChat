@@ -10,5 +10,7 @@ namespace BlazzingChat.Client.ViewModels
 
         public Task Save();
         public Task GetProfile();
+        Task UpdateTheme();
+        Task UpdateNotifications();
     }
 }

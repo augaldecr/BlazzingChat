@@ -1,4 +1,18 @@
-﻿export const downloadFile = (mimeType, base64String, fileName) =>
+﻿export const setTheme = (themeName) => {
+
+    let newLink = document.createElement("link");
+    newLink.setAttribute("id", "theme");
+    newLink.setAttribute("rel", "stylesheet");
+    newLink.setAttribute("type", "text/css");
+    newLink.setAttribute("href", `css/app-${themeName}.css`);
+
+    let head = document.getElementsByTagName("head")[0];
+    head.querySelector("#theme").remove();
+
+    head.appendChild(newLink);
+}
+
+export const downloadFile = (mimeType, base64String, fileName) =>
 {
     var fileDataUrl = `data:${mimeType};base64,${base64String}`;
     fetch(fileDataUrl)

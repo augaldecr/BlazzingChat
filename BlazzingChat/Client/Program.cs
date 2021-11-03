@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Blazored.Toast;
 using BlazzingChat.Client.Logging;
 using BlazzingChat.Client.ViewModels;
+using Blazored.LocalStorage;
+using BlazzingChat.Client.Helpers;
 
 namespace BlazzingChat.Client
 {
@@ -22,9 +24,13 @@ namespace BlazzingChat.Client
             builder.Services.AddAuthorizationCore();
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-            
+
             LoadHttpClients(builder);
+            
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+            builder.Services.AddBlazoredLocalStorage();
+
+            builder.Services.AddTransient<CustomAuthorizationHandler>();
 
             builder.Services.AddLogging(logging =>
             {
@@ -34,7 +40,6 @@ namespace BlazzingChat.Client
                 logging.ClearProviders();
                 logging.AddProvider(new ApplicationLoggerProvider(httpClient, authenticationStateProvider));
             });
-
 
             builder.Services.AddBlazoredToast();
 
@@ -50,7 +55,8 @@ namespace BlazzingChat.Client
                 ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
             builder.Services.AddHttpClient<IContactsViewModel, ContactsViewModel>
-                ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+                ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+                .AddHttpMessageHandler<CustomAuthorizationHandler>();
 
             builder.Services.AddHttpClient<ILoginViewModel, LoginViewModel>
                 ("BlazzingChatClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));

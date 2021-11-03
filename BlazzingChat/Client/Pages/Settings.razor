@@ -11,7 +11,7 @@
         <label>Notification</label>
     </div>
     <div class="row">
-        <RadzenSwitch @bind-Value="@_settingsViewModel.DarkTheme" Style="margin-bottom : 20px" />
+        <RadzenSwitch @bind-Value="@_settingsViewModel.DarkTheme" Style="margin-bottom : 20px" Change="UpdateTheme"  />
         <span>&nbsp;</span>
         <label>Dark theme</label>
     </div>

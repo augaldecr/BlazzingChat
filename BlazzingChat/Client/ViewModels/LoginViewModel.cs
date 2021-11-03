@@ -18,10 +18,25 @@ namespace BlazzingChat.Client.ViewModels
 
         public string Email { get; set; }
         public string Password { get; set; }
+        public bool RememberMe { get; set; }
 
         public async Task LoginUser()
         {
-            await _httpClient.PostAsJsonAsync<User>("api/Users/loginuser", this);
+            await _httpClient.PostAsJsonAsync<User>($"api/Users/loginuser?isPersistent={this.RememberMe}", this);
+        }
+
+        public async Task<AuthenticationResponse> AuthenticateJWT()
+        {
+            //creating authentication request
+            AuthenticationRequest authenticationRequest = new AuthenticationRequest();
+            authenticationRequest.EmailAddress = this.Email;
+            authenticationRequest.Password = this.Password;
+
+            //authenticating the request
+            var httpMessageReponse = await _httpClient.PostAsJsonAsync<AuthenticationRequest>($"api/Users/authenticatejwt", authenticationRequest);
+
+            //sending the token to the client to store
+            return await httpMessageReponse.Content.ReadFromJsonAsync<AuthenticationResponse>();
         }
 
         public static implicit operator LoginViewModel(User user)

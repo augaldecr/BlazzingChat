@@ -10,21 +10,36 @@
 <div class="col-6">
     <input type="password" @bind="@_loginViewModel.Password" class="form-control" placeholder="Password" />
 </div>
-
-<div class="col-6">
-    <button class="btn btn-primary" @onclick="LoginUser">Login</button>
+<div class="col-xl-6 col-md-8 col-12 row">
+    <div class="col-xl-2 col-lg-2 col-md-6 col-sm-3 col-3">
+        <RadzenSwitch style="margin-bottom: 20px;" @bind-Value="@_loginViewModel.RememberMe" Name="RememberMe" />
+    </div>
+    <div class="col-xl-5 col-lg-5 col-md-6 col-sm-9 col-9">
+        <label style="margin-top: 20px; font-weight: bold; color: #0366d6;">Remember Me</label>
+    </div>
 </div>
-<br />
+<div class="col-xl-6 col-md-8 col-12 row">
+    <div class="col-xl-2 col-lg-2 col-md-6 col-sm-3 col-3">
+        @*<button class="btn btn-danger" @onclick="LoginUser">Login</button>*@
+        <button class="btn btn-danger" @onclick="AuthenticateJWT">Login</button>
+    </div>
+    <div class="col-xl-5 col-lg-5 col-md-6 col-sm-9 col-9">
+        <a style="font-weight: bold;" href="/createaccount">Create an account</a>
+    </div>
+</div>
+<hr />
 <div class="col-6">
     <a class="btn btn-block btn-social btn-twitter" @onclick="@TwitterSignIn">
         <span class="fa fa-twitter"></span> <b>Sign in using Twitter</b>
     </a>
 </div>
+<br />
 <div class="col-6">
     <a class="btn btn-block btn-social btn-facebook" @onclick="@FacebookSignIn">
         <span class="fa fa-facebook"></span> <b>Sign in using Facebook</b>
     </a>
 </div>
+<br />
 <div class="col-6">
     <a class="btn btn-block btn-social btn-google" @onclick="@GoogleSignIn">
         <span class="fa fa-Google"></span> <b>Sign in using Google</b>

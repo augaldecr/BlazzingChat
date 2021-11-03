@@ -1,4 +1,5 @@
-﻿using BlazzingChat.Shared.Models;
+﻿using Blazored.Toast.Services;
+using BlazzingChat.Shared.Models;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -12,13 +13,14 @@ namespace BlazzingChat.Client.ViewModels
         public bool DarkTheme { get; set; }
 
         private HttpClient _httpClient;
+        public IToastService _toastService { get; }
 
-        public SettingsViewModel()
-        {
-        }
-        public SettingsViewModel(HttpClient httpClient)
+        public SettingsViewModel() { }
+
+        public SettingsViewModel(HttpClient httpClient, IToastService toastService)
         {
             _httpClient = httpClient;
+            _toastService = toastService;
         }
         public async Task GetProfile()
         {
@@ -27,9 +29,28 @@ namespace BlazzingChat.Client.ViewModels
         }
         public async Task Save()
         {
-            User user = new() { DarkTheme = int.Parse(this.DarkTheme.ToString()), Notifications = int.Parse(this.Notifications.ToString()) };
+            //await _httpClient.PutAsJsonAsync($"api/Users/updatetheme/{Id}", this);
+            //await _httpClient.PutAsJsonAsync($"api/Users/updatenotifications/{Id}", this);
             await _httpClient.PutAsJsonAsync<User>($"api/Users/UpdateSettings/{Id}", this);
+
+            _toastService.ShowSuccess("Settings have been saved successfully");
         }
+
+        public async Task UpdateTheme()
+        {
+            User user = this;
+            await _httpClient.PutAsJsonAsync<User>($"api/Users/UpdateSettings/{Id}", this);
+
+            _toastService.ShowSuccess("Settings have been saved successfully");
+        }
+
+        public async Task UpdateNotifications()
+        {
+            User user = this;
+            await _httpClient.PutAsJsonAsync($"settings/updatenotifications/{Id}", user);
+            _toastService.ShowSuccess("Settings have been saved successfully");
+        }
+
         private void LoadCurrentObject(SettingsViewModel settingsViewModel)
         {
             Id = settingsViewModel.Id;
