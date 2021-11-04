@@ -33,7 +33,8 @@ namespace BlazzingChat.Server
             services.AddRazorPages();
             services.AddSignalR();
 
-            services.AddDbContext<BlazzingChatDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("BlazzingChatDbContext")));
+            //services.AddDbContext<BlazzingChatDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("BlazzingChatDbContext")));
+            services.AddDbContext<BlazzingChatDbContext>();
             services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(

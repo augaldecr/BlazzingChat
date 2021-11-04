@@ -46,11 +46,11 @@ namespace BlazzingChat.Server.Logging
             log.CreatedDate = DateTime.Now.ToString();
             log.UserId = string.IsNullOrEmpty(userId) ? null : Convert.ToInt32(userId);
 
-            _blazzingChatDbContext.Logs.Add(log);
+            //_blazzingChatDbContext.Logs.Add(log);
 
             try
             {
-                _blazzingChatDbContext.SaveChanges();
+                //_blazzingChatDbContext.SaveChanges();
             }
             catch (Exception ex)
             {

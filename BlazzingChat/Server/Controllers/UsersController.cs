@@ -164,7 +164,7 @@ namespace BlazzingChat.Server.Controllers
             var emailAddressExists = _context.Users.FirstOrDefault(u => u.EmailAddress == user.EmailAddress);
             if (emailAddressExists is null)
             {
-                //user.Password = Utility.Encrypt(user.Password);
+                //user.Password = Utilities.Encrypt(user.Password);
                 user.Password = user.Password;
                 user.Source = "APPL";
                 _context.Users.Add(user);
@@ -222,7 +222,8 @@ namespace BlazzingChat.Server.Controllers
                     currentUser = new();
                     currentUser.Id = _context.Users.Max(u => u.Id) + 1;
                     currentUser.EmailAddress = User.FindFirstValue(ClaimTypes.Email);
-                    currentUser.Password = Utilities.Encrypt(currentUser.EmailAddress);
+                    //currentUser.Password = Utilities.Encrypt(currentUser.EmailAddress);
+                    currentUser.Password = currentUser.EmailAddress;
                     currentUser.Source = "EXTL";
 
                     _context.Users.Add(currentUser);
@@ -370,7 +371,8 @@ namespace BlazzingChat.Server.Controllers
 
             //authenticationRequest.Password = Utilities.Encrypt(authenticationRequest.Password);
             Data.User loggedInUser = await _context.Users
-                        .Where(u => u.EmailAddress == authenticationRequest.EmailAddress && u.Password == authenticationRequest.Password)
+                        .Where(u => u.EmailAddress.Equals(authenticationRequest.EmailAddress) &&
+                                    u.Password.Equals(authenticationRequest.Password))
                         .FirstOrDefaultAsync();
 
             if (loggedInUser is not null)
@@ -469,7 +471,8 @@ namespace BlazzingChat.Server.Controllers
                 loggedInUser = new Data.User();
                 loggedInUser.Id = _context.Users.Max(user => user.Id) + 1;
                 loggedInUser.EmailAddress = User.FindFirstValue(ClaimTypes.Email);
-                loggedInUser.Password = Utilities.Encrypt(loggedInUser.EmailAddress);
+                //loggedInUser.Password = Utilities.Encrypt(loggedInUser.EmailAddress);
+                loggedInUser.Password = loggedInUser.EmailAddress;
                 loggedInUser.Source = "EXTL";
 
                 _context.Users.Add(loggedInUser);

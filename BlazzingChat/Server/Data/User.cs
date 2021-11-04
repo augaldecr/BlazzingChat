@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 #nullable disable
 
@@ -7,19 +8,17 @@ namespace BlazzingChat.Server.Data
 {
     public partial class User
     {
-        public User()
-        {
-            ChatHistoryFromUsers = new HashSet<ChatHistory>();
-            ChatHistoryToUsers = new HashSet<ChatHistory>();
-        }
-
         public int Id { get; set; }
+
+        [Required]
         public string EmailAddress { get; set; }
+
+        [Required]
         public string Password { get; set; }
         public string Source { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime? Birthday { get; set; }
+        public string Birthday { get; set; }
         public string AboutMe { get; set; }
         public int? Notifications { get; set; }
         public int? DarkTheme { get; set; }
@@ -27,7 +26,7 @@ namespace BlazzingChat.Server.Data
         public string ProfilePictDataUrl { get; set; }
         public string Role { get; set; }
 
-        public virtual ICollection<ChatHistory> ChatHistoryFromUsers { get; set; }
-        public virtual ICollection<ChatHistory> ChatHistoryToUsers { get; set; }
+        public ICollection<ChatHistory> ChatHistoryFromUsers { get; set; }
+        public ICollection<ChatHistory> ChatHistoryToUsers { get; set; }
     }
 }
