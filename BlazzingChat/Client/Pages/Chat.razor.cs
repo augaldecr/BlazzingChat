@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.JSInterop;
 using Microsoft.JSInterop.Implementation;
 using System;
@@ -19,6 +20,7 @@ namespace BlazzingChat.Client.Pages
         [Inject] NavigationManager _navigationManager { get; set; }
         [Inject] HttpClient _httpClient { get; set; }
         [Inject] IJSRuntime _jSRuntime { get; set; }
+        [Inject] IConfiguration configuration { get; set; }
 
         IJSObjectReference module;
 
@@ -41,8 +43,10 @@ namespace BlazzingChat.Client.Pages
             if (Convert.ToInt32(ToUserId) > 0)
                 ToUser = await _httpClient.GetFromJsonAsync<User>($"api/Users/{ToUserId}");
 
+            string baseAddress = configuration["BaseAddress"];
+
             hubConnection = new HubConnectionBuilder()
-                .WithUrl(_navigationManager.ToAbsoluteUri("/chathub"))
+                .WithUrl($"{baseAddress}chathub")
                 .Build();
 
             hubConnection.On<Message>("ReceiveMessage", (message) =>
