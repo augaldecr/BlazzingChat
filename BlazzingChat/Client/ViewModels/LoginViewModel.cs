@@ -39,6 +39,11 @@ namespace BlazzingChat.Client.ViewModels
             return await httpMessageReponse.Content.ReadFromJsonAsync<AuthenticationResponse>();
         }
 
+        public async Task<string> GetFacebookAppIDAsync()
+        {
+            return await _httpClient.GetStringAsync("api/Users/getfacebookappid");
+        }
+
         public static implicit operator LoginViewModel(User user)
         {
             return new LoginViewModel

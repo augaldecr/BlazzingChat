@@ -82,7 +82,9 @@ namespace BlazzingChat.Server
             {
                 logging.ClearProviders();
             });
+
             services.AddHttpContextAccessor();
+            services.AddHttpClient();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)

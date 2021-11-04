@@ -61,5 +61,13 @@ namespace BlazzingChat.Client.Pages
                 _toastService.ShowError("Invalid username or password");
             }
         }
+
+        public async Task FacebookJWT()
+        {
+            var appId = await _loginViewModel.GetFacebookAppIDAsync();
+
+            var accessTokenRequest = $"https://www.facebook.com/v11.0/dialog/oauth?&response_type=token&client_id={appId}&redirect_uri=https://localhost:5001/FacebookAuth";
+            _navigationManager.NavigateTo(accessTokenRequest, true);
+        }
     }
 }

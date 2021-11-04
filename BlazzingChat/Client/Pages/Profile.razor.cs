@@ -21,6 +21,8 @@ namespace BlazzingChat.Client.Pages
         private IJSObjectReference _jsUtils;
 
         [CascadingParameter] Task<AuthenticationState> _authenticationState { get; set; }
+        public bool IsLoading { get; set; } = true;
+        public bool IsUserAuthorized { get; set; } = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -31,17 +33,26 @@ namespace BlazzingChat.Client.Pages
             {
                 var claim = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
                 _profileViewModel.Id = Convert.ToInt32(claim?.Value);
+                IsUserAuthorized = user.IsInRole("admin") || user.IsInRole("general");
 
                 try
                 {
                     await _profileViewModel.GetProfile();
+
+                    if (_profileViewModel.ProfilePictDataUrl is null)
+                    {
+                        _profileViewModel.ProfilePictDataUrl = "/img/profile_pic.jpg";
+                        Console.WriteLine(_profileViewModel.ProfilePictDataUrl);
+                    }
+
+                    IsLoading = false;
                 }
                 catch (System.Net.Http.HttpRequestException hex)
                 {
                     if (hex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
-                        await _httpClient.GetAsync("api/Users/logoutuser");
-                        _navigationManager.NavigateTo("/", true);
+                        //await _httpClient.GetAsync("api/Users/logoutuser");
+                        //_navigationManager.NavigateTo("/", true);
                     }
                 }
             }
